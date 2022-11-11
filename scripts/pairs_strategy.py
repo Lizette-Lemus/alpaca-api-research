@@ -3,7 +3,7 @@ from datetime import datetime
 import alpaca_trade_api as tradeapi
 import logging
 
-logging.basicConfig(filename="log.txt", level=logging.DEBUG)
+logging.basicConfig(filename="log.txt", level=logging.INFO)
 logging.info("Info logging test...")
 
 #Read credentials
@@ -79,24 +79,30 @@ def place_trades(spread, entry_level, loss_exit_level):
     active_position = len(alpaca_trade.list_positions()) != 0    
     print("spread", spread)
     print("z score:", z_score)
+    logging.info(f"z score: {z_score}")
 
     #Going short
     if z_score > entry_level and not active_position:
         print("placing short order on TLT")
+        logging.info("placing short order on TLT")
         alpaca_trade.submit_order(symbol="TLT", qty=slope, type='market', side='buy', time_in_force='day')
         print("placing long order on SPY")
+        logging.info("placing long order on SPY")
         alpaca_trade.submit_order(symbol="SPY", qty=1, type='market', side='sell', time_in_force='day')
 
     elif z_score > loss_exit_level and active_position:
         print("liquidating at loss exit level")
+        logging.info("liquidating at loss exit level")
         #liquidate if loss exit level is breached
         alpaca_trade.close_all_positions()
 
-    elif z_score < 0.1 and active_position:
+    elif z_score < .1 and active_position:
         # liquidate if 0 spread is crossed with an active position
-        print("closing at 0 spread $$$") 
+        print("closing at .1 spread $$$") 
+        logging.info("closing at 0 spread $$$") 
         alpaca_trade.close_all_positions()
     print(" ")
+    logging.info(" ")
      
 def main():
     alpaca_stream.subscribe_bars(on_equity_bar, "TLT")
