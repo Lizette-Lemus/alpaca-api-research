@@ -90,6 +90,50 @@ class SmaCross(bt.Strategy):
         elif self.position and self.crossover < 0:  # in the market & cross to the downside
             self.close()  # close long position
 
+class AllWeatherStrategy(bt.Strategy):
 
-run_backtest(SmaCross, 'AAPL', '2019-01-01', '2021-11-01', tradeapi.TimeFrame.Day, 10000)
+    def __init__(self):
+        # the last year we rebalanced (initialized to -1)
+        self.year_last_rebalanced = -1 
+        self.weights = { "VTI" : 0.30 , "TLT" : 0.40, "IEF": 0.15, "GLD" : 0.075, "DBC" : 0.075 }
+
+    def next(self):
+        # if we’ve already rebalanced this year
+        if self.datetime.date().year == self.year_last_rebalanced:
+            return
+            
+        # update year last balanced
+        self.year_last_rebalanced = self.datetime.date().year
+        
+        # enumerate through each security
+        for i,d in enumerate(self.datas):
+            # rebalance portfolio with desired target percents
+            symbol = d._name
+            self.order_target_percent(d, target=self.weights[symbol])
+
+class AllWeatherStrategy(bt.Strategy):
+
+    def __init__(self):
+        # the last year we rebalanced (initialized to -1)
+        self.year_last_rebalanced = -1 
+        self.weights = { "AMT" : 0.30 , "CCL" : 0.40, "FOX": 0.30}
+
+    def next(self):
+        # if we’ve already rebalanced this year
+        if self.datetime.date().year == self.year_last_rebalanced:
+            return
+            
+        # update year last balanced
+        self.year_last_rebalanced = self.datetime.date().year
+        
+        # enumerate through each security
+        for i,d in enumerate(self.datas):
+            # rebalance portfolio with desired target percents
+            symbol = d._name
+            self.order_target_percent(d, target=self.weights[symbol])
+
+run_backtest(AllWeatherStrategy, ["AMT", "CCL", "FOX"] , '2020-01-01', '2020-12-01', tradeapi.TimeFrame.Day, 10000)
+#run_backtest(AllWeatherStrategy, ["VTI", "TLT", "IEF", "GLD", "DBC"] , '2015-01-01', '2021-11-01', tradeapi.TimeFrame.Day, 10000)
+#run_backtest(SmaCross, 'AAPL', '2019-01-01', '2021-11-01', tradeapi.TimeFrame.Day, 10000)
+
 
